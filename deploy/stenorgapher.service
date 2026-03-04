@@ -1,0 +1,22 @@
+[Unit]
+Description=Stenographer
+After=network.target
+
+[Service]
+WorkingDirectory=/home/stenographer/stenographer
+ExecStart=/home/stenographer/.local/bin/uv run main.py
+EnvironmentFile=/etc/env/stenographer.env
+User=stenographer
+Group=stenographer
+LimitNOFILE=65536
+Restart=on-failure
+TimeoutSec=30
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

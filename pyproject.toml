@@ -1,0 +1,17 @@
+[project]
+name = "stenographer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.13.3",
+    "ffmpeg-python>=0.2.0",
+    "numpy>=2.4.2",
+    "openai-whisper>=20250625",
+    "pytelegrambotapi>=4.31.0",
+]
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "basic"

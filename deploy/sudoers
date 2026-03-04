@@ -1,0 +1,4 @@
+stenographer ALL=(ALL) NOPASSWD: /bin/systemctl start stenographer
+stenographer ALL=(ALL) NOPASSWD: /bin/systemctl stop stenographer
+stenographer ALL=(ALL) NOPASSWD: /bin/systemctl restart stenographer
+stenographer ALL=(ALL) NOPASSWD: /bin/systemctl status stenographer
