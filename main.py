@@ -10,6 +10,7 @@ from bot.bot import init, create_message_updater
 
 TELEGRAM_API_KEY_ENV = "BOT_TOKEN"
 ADMIN_CHAT_ID_ENV = "ADMIN_CHAT_ID"
+MODEL_ENV = "MODEL"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 async def main():
     bot_token = os.environ[TELEGRAM_API_KEY_ENV]
     admin_chat_id = os.environ[ADMIN_CHAT_ID_ENV]
+    model = os.environ[MODEL_ENV]
 
     media_queue = asyncio.Queue(maxsize=50)
 
@@ -37,7 +39,7 @@ async def main():
         bot = AsyncTeleBot(bot_token, state_storage=StateMemoryStorage())
         bot = await init(bot, int(admin_chat_id), connection, media_queue)
 
-        transcribe_task = asyncio.create_task(transcription_worker(media_queue, create_message_updater(bot)))
+        transcribe_task = asyncio.create_task(transcription_worker(media_queue, create_message_updater(bot), model))
 
         await bot.polling()
 

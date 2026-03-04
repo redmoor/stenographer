@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 executor = ProcessPoolExecutor(max_workers=1)
 
-async def transcription_worker(queue: asyncio.Queue, send_message):
+async def transcription_worker(queue: asyncio.Queue, send_message, model):
     logger.info("worker starts")
 
     loop = asyncio.get_running_loop()
@@ -25,7 +25,7 @@ async def transcription_worker(queue: asyncio.Queue, send_message):
             )
 
         try:
-            result = await loop.run_in_executor(executor, transcribe, audio_np)
+            result = await loop.run_in_executor(executor, transcribe, audio_np, model)
             if result == "":
                 result = "I can't hear anything"
         except Exception as e:
@@ -40,7 +40,7 @@ async def transcription_worker(queue: asyncio.Queue, send_message):
         )
         queue.task_done()
 
-def transcribe(file):
-    model = whisper.load_model("tiny")
+def transcribe(file, model):
+    model = whisper.load_model(model)
     result = model.transcribe(file, fp16=False)
     return result["text"]
