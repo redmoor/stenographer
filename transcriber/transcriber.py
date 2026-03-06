@@ -8,40 +8,41 @@ logger = logging.getLogger(__name__)
 
 model_instance = None
 
+
 async def transcription_worker(queue: asyncio.Queue, send_message, executor):
-    logger.info("worker starts")
+    logger.info("Starting worker")
 
     loop = asyncio.get_running_loop()
     while True:
         chat_id, message_id, audio_bytes = await queue.get()
         audio_np = np.frombuffer(audio_bytes, dtype=np.float32)
 
-        await send_message(
-                chat_id=chat_id,
-                message_id=message_id,
-                text="Transcribing"
-            )
+        await send_message(chat_id=chat_id, message_id=message_id, text="Transcribing")
 
         try:
             result = await loop.run_in_executor(executor, transcribe, audio_np)
             if result == "":
                 result = "I can't hear anything"
         except Exception as e:
-            logger.error(f"Transcription error: {e}")
+            logger.exception(f"Transcription error: {e}")
             result = "Error while transcribing a message"
             continue
 
-        await send_message(
-            chat_id=chat_id,
-            message_id=message_id,
-            text=result
-        )
+        await send_message(chat_id=chat_id, message_id=message_id, text=result)
         queue.task_done()
+
 
 def init_model(model_name):
     global model_instance
     model_instance = whisper.load_model(model_name)
 
+
 def transcribe(file):
+    logger.info("Starting transcription")
+
+    if model_instance is None:
+        raise RuntimeError("Worker model was not initialized!")
+
     result = model_instance.transcribe(file, fp16=False)
+    logger.info("Transcription completed")
     return result["text"]
