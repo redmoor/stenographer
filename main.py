@@ -5,7 +5,7 @@ import sqlite3
 
 from telebot.async_telebot import AsyncTeleBot
 from telebot.asyncio_storage import StateMemoryStorage
-from transcriber.transcriber import transcription_worker
+from transcriber.transcriber import transcription_worker, init_model
 from bot.bot import init, create_message_updater
 
 TELEGRAM_API_KEY_ENV = "BOT_TOKEN"
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 async def main():
     bot_token = os.environ[TELEGRAM_API_KEY_ENV]
     admin_chat_id = os.environ[ADMIN_CHAT_ID_ENV]
-    model = os.environ[MODEL_ENV]
+    model_name = os.environ[MODEL_ENV]
 
     media_queue = asyncio.Queue(maxsize=50)
 
@@ -37,6 +37,7 @@ async def main():
         connection.commit()
 
         bot = AsyncTeleBot(bot_token, state_storage=StateMemoryStorage())
+        model = init_model(model_name)
         bot = await init(bot, int(admin_chat_id), connection, media_queue)
 
         transcribe_task = asyncio.create_task(transcription_worker(media_queue, create_message_updater(bot), model))

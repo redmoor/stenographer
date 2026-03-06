@@ -40,7 +40,9 @@ async def transcription_worker(queue: asyncio.Queue, send_message, model):
         )
         queue.task_done()
 
+def init_model(model_name):
+    return whisper.load_model(model_name)
+
 def transcribe(file, model):
-    model = whisper.load_model(model)
     result = model.transcribe(file, fp16=False)
     return result["text"]
