@@ -7,6 +7,7 @@ from telebot.async_telebot import AsyncTeleBot
 from telebot.asyncio_storage import StateMemoryStorage
 from transcriber.transcriber import transcription_worker, init_model
 from bot.bot import init, create_message_updater
+from concurrent.futures import ProcessPoolExecutor
 
 TELEGRAM_API_KEY_ENV = "BOT_TOKEN"
 ADMIN_CHAT_ID_ENV = "ADMIN_CHAT_ID"
@@ -37,10 +38,15 @@ async def main():
         connection.commit()
 
         bot = AsyncTeleBot(bot_token, state_storage=StateMemoryStorage())
-        model = init_model(model_name)
         bot = await init(bot, int(admin_chat_id), connection, media_queue)
 
-        transcribe_task = asyncio.create_task(transcription_worker(media_queue, create_message_updater(bot), model))
+        executor = ProcessPoolExecutor(
+            max_workers=1,
+            initializer=init_model,
+            initargs=(model_name,)
+        )
+
+        transcribe_task = asyncio.create_task(transcription_worker(media_queue, create_message_updater(bot), executor))
 
         await bot.polling()
 
