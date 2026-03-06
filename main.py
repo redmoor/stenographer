@@ -28,6 +28,7 @@ async def main():
     media_queue = asyncio.Queue(maxsize=50)
 
     with sqlite3.connect("bot.db") as connection:
+        logger.info("Database connection established")
         cursor = connection.cursor()
         auth_users_query = '''
             CREATE TABLE IF NOT EXISTS authorized_users(
@@ -39,6 +40,7 @@ async def main():
 
         bot = AsyncTeleBot(bot_token, state_storage=StateMemoryStorage())
         bot = await init(bot, int(admin_chat_id), connection, media_queue)
+        logger.info("Telegram bot initialized")
 
         executor = ProcessPoolExecutor(
             max_workers=1,
